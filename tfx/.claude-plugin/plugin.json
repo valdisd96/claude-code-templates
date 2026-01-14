@@ -1,0 +1,9 @@
+{
+  "name": "tfx",
+  "version": "1.0.0",
+  "description": "TensorFlow Extended (TFX) & Jupyter development configuration with Memory Bank system",
+  "author": "uvauchok",
+  "keywords": ["tfx", "tensorflow", "ml", "data-pipeline", "jupyter"],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}

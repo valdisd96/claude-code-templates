@@ -1,0 +1,9 @@
+{
+  "name": "kubernetes",
+  "version": "1.0.0",
+  "description": "Kubernetes cluster management, diagnostics, and troubleshooting configuration",
+  "author": "uvauchok",
+  "keywords": ["kubernetes", "k8s", "devops", "cluster", "kubectl"],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}

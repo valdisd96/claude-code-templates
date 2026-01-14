@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python*)",
+      "Bash(pip*)",
+      "Bash(pytest*)",
+      "Bash(jupyter*)",
+      "Bash(conda*)",
+      "Bash(poetry*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)*"
+    ]
+  },
+  "env": {
+    "PYTHONPATH": "${workspaceFolder}",
+    "JUPYTER_CONFIG_DIR": "${workspaceFolder}/.jupyter"
+  },
+  "mcpServers": {
+    "jupyter": {
+      "command": "uvx",
+      "args": ["jupyter-mcp-server@latest"],
+      "env": {
+        "JUPYTER_URL": "http://localhost:8888",
+        "JUPYTER_TOKEN": "YOUR_TOKEN",
+        "ALLOW_IMG_OUTPUT": "true"
+      }
+    }
+  }
+}

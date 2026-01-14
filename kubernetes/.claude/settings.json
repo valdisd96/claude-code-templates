@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl get*)",
+      "Bash(kubectl describe*)",
+      "Bash(kubectl logs*)",
+      "Bash(kubectl top*)",
+      "Bash(kubectl config*)",
+      "Bash(kubectl explain*)",
+      "Bash(kubectl api-resources*)",
+      "Bash(kubectl version*)",
+      "Bash(helm list*)",
+      "Bash(helm status*)",
+      "Bash(helm get*)"
+    ],
+    "deny": [
+      "Bash(kubectl delete namespace*)",
+      "Bash(kubectl delete pvc --all*)",
+      "Bash(kubectl drain*--force*)",
+      "Bash(kubectl delete --all*)",
+      "Bash(rm -rf /)*"
+    ]
+  },
+  "env": {
+    "KUBECONFIG": "${HOME}/.kube/config"
+  }
+}
