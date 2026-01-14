@@ -203,7 +203,7 @@ MCP servers must be configured in a separate `.mcp.json` file at the project roo
   "mcpServers": {
     "server-name": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-name", "${workspaceFolder}"],
+      "args": ["-y", "@modelcontextprotocol/server-name", "."],
       "env": {
         "OPTIONAL_ENV_VAR": "value"
       }
