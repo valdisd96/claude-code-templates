@@ -1,0 +1,27 @@
+{
+  "name": "claude-code-templates",
+  "description": "Domain-specific Claude Code configurations for ML, DevOps, and Data Science workflows",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "tfx",
+      "path": "tfx",
+      "description": "TensorFlow Extended (TFX) & Jupyter development with Memory Bank system"
+    },
+    {
+      "name": "kubernetes",
+      "path": "kubernetes",
+      "description": "Kubernetes cluster management, diagnostics, and troubleshooting"
+    },
+    {
+      "name": "helm",
+      "path": "helm",
+      "description": "Helm charts development, validation, and debugging"
+    },
+    {
+      "name": "data-science",
+      "path": "data-science",
+      "description": "Data Science & Jupyter notebook development with EDA workflows"
+    }
+  ]
+}

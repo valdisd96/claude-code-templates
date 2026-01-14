@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(helm lint*)",
+      "Bash(helm template*)",
+      "Bash(helm dependency*)",
+      "Bash(helm show*)",
+      "Bash(helm search*)",
+      "Bash(helm list*)",
+      "Bash(helm status*)",
+      "Bash(helm get*)",
+      "Bash(helm history*)",
+      "Bash(helm repo*)",
+      "Bash(helm install*--dry-run*)",
+      "Bash(helm upgrade*--dry-run*)"
+    ],
+    "deny": [
+      "Bash(helm uninstall*--no-hooks*)",
+      "Bash(helm rollback*)",
+      "Bash(rm -rf /)*"
+    ]
+  },
+  "env": {
+    "HELM_CACHE_HOME": "${HOME}/.cache/helm",
+    "HELM_CONFIG_HOME": "${HOME}/.config/helm"
+  }
+}

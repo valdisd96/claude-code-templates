@@ -1,0 +1,9 @@
+{
+  "name": "data-science",
+  "version": "1.0.0",
+  "description": "Data Science & Jupyter notebook development configuration with EDA workflows",
+  "author": "uvauchok",
+  "keywords": ["data-science", "jupyter", "pandas", "eda", "ml", "python"],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}

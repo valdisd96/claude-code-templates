@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python*)",
+      "Bash(pip*)",
+      "Bash(pytest*)",
+      "Bash(jupyter*)",
+      "Bash(conda*)",
+      "Bash(git*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)*"
+    ]
+  },
+  "env": {
+    "TF_CPP_MIN_LOG_LEVEL": "2",
+    "PYTHONPATH": "${workspaceFolder}"
+  },
+  "mcpServers": {
+    "jupyter": {
+      "command": "uvx",
+      "args": ["jupyter-mcp-server@latest"],
+      "env": {
+        "JUPYTER_URL": "http://localhost:8888",
+        "JUPYTER_TOKEN": "YOUR_TOKEN",
+        "ALLOW_IMG_OUTPUT": "true"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  }
+}
+

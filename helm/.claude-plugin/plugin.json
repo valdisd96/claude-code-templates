@@ -1,0 +1,9 @@
+{
+  "name": "helm",
+  "version": "1.0.0",
+  "description": "Helm charts development, validation, and debugging configuration",
+  "author": "uvauchok",
+  "keywords": ["helm", "kubernetes", "charts", "devops", "deployment"],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}
