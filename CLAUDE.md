@@ -25,6 +25,7 @@ claude-code-templates/
 ├── tfx/                         # TensorFlow Extended / Data Pipelines
 │   ├── CLAUDE.md
 │   ├── README.md
+│   ├── .mcp.json                # MCP server configuration
 │   ├── .claude-plugin/
 │   │   └── plugin.json          # Plugin manifest
 │   └── .claude/
@@ -35,6 +36,7 @@ claude-code-templates/
 ├── data-science/                # Jupyter / Pandas / ML Experimentation
 │   ├── CLAUDE.md
 │   ├── README.md
+│   ├── .mcp.json                # MCP server configuration
 │   ├── .claude-plugin/
 │   │   └── plugin.json
 │   └── .claude/
@@ -122,7 +124,8 @@ Each domain configuration MUST include:
 |------|---------|----------|
 | `CLAUDE.md` | Main agent instructions, domain expertise, code standards | Yes |
 | `README.md` | User documentation, features, usage guide | Yes |
-| `.claude/settings.json` | Permissions, env vars, MCP servers | Yes |
+| `.claude/settings.json` | Permissions and env vars | Yes |
+| `.mcp.json` | MCP server configuration | If domain uses MCP |
 | `.claude/commands/*.md` | Domain-specific slash commands | Yes (min 3) |
 | `.claude-plugin/plugin.json` | Plugin manifest for marketplace distribution | Yes |
 | `.claude/skills/*/SKILL.md` | Auto-triggered domain expertise | Optional |
@@ -187,12 +190,32 @@ Commands in `.claude/commands/*.md` should follow:
   },
   "env": {
     "DOMAIN_SPECIFIC_VAR": "value"
-  },
-  "mcpServers": {
-    // Domain-specific MCP integrations
   }
 }
 ```
+
+### .mcp.json Structure
+
+MCP servers must be configured in a separate `.mcp.json` file at the project root:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-name", "${workspaceFolder}"],
+      "env": {
+        "OPTIONAL_ENV_VAR": "value"
+      }
+    }
+  }
+}
+```
+
+Common MCP servers:
+- `@modelcontextprotocol/server-filesystem` - File system access
+- `@modelcontextprotocol/server-memory` - Persistent memory
+- `jupyter-mcp-server` - Jupyter notebook integration (via `uvx`)
 
 ### plugin.json Structure (for marketplace)
 
@@ -261,6 +284,8 @@ mkdir -p $DOMAIN/.claude-plugin
 touch $DOMAIN/{CLAUDE.md,README.md}
 touch $DOMAIN/.claude/settings.json
 touch $DOMAIN/.claude-plugin/plugin.json
+# Optional: if domain needs MCP servers
+touch $DOMAIN/.mcp.json
 ```
 
 ### Step 2: Research Domain Requirements
@@ -273,11 +298,12 @@ touch $DOMAIN/.claude-plugin/plugin.json
 ### Step 3: Create Core Files
 
 1. **CLAUDE.md**: Define agent expertise and domain knowledge
-2. **settings.json**: Configure safe permissions and MCP servers
-3. **Commands**: Create 3-5 essential domain commands
-4. **plugin.json**: Add plugin manifest with name, version, description
-5. **README.md**: Document features and usage
-6. **Update marketplace.json**: Add new plugin to root marketplace manifest
+2. **settings.json**: Configure safe permissions and environment variables
+3. **.mcp.json**: Configure MCP servers (if domain needs them)
+4. **Commands**: Create 3-5 essential domain commands
+5. **plugin.json**: Add plugin manifest with name, version, description
+6. **README.md**: Document features and usage
+7. **Update marketplace.json**: Add new plugin to root marketplace manifest
 
 ### Step 4: Test Configuration
 

@@ -129,6 +129,13 @@ install_config() {
     echo -e "${BLUE}Installing CLAUDE.md...${NC}"
     copy_file "$domain_dir/CLAUDE.md" "$target/CLAUDE.md"
 
+    # Copy .mcp.json (MCP server configuration)
+    if [ -f "$domain_dir/.mcp.json" ]; then
+        echo ""
+        echo -e "${BLUE}Installing .mcp.json (MCP servers)...${NC}"
+        copy_file "$domain_dir/.mcp.json" "$target/.mcp.json"
+    fi
+
     # Copy .claude directory
     if [ -d "$domain_dir/.claude" ]; then
         echo ""
@@ -174,6 +181,7 @@ install_config() {
     echo ""
     echo "Installed:"
     echo "  - CLAUDE.md"
+    [ -f "$target/.mcp.json" ] && echo "  - .mcp.json (MCP servers)"
     [ -f "$target/.claude/settings.json" ] && echo "  - .claude/settings.json"
     if [ -d "$target/.claude/commands" ]; then
         cmd_count=$(find "$target/.claude/commands" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
