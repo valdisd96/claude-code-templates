@@ -1,0 +1,16 @@
+{
+  "name": "docker",
+  "version": "1.0.0",
+  "description": "Docker container management, Dockerfile optimization, and troubleshooting",
+  "author": "uvauchok",
+  "keywords": [
+    "docker",
+    "container",
+    "dockerfile",
+    "docker-compose",
+    "devops",
+    "containerization"
+  ],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}

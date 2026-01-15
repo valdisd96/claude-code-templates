@@ -22,6 +22,11 @@
       "name": "data-science",
       "path": "data-science",
       "description": "Data Science & Jupyter notebook development with EDA workflows"
+    },
+    {
+      "name": "docker",
+      "path": "docker",
+      "description": "Docker container management, Dockerfile optimization, and troubleshooting"
     }
   ]
 }
