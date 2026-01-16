@@ -3,7 +3,7 @@
 Validate docker-compose.yml syntax, structure, and best practices.
 
 ## Arguments
-- `$ARGUMENTS`: Path to docker-compose file (defaults to ./docker-compose.yml)
+- `$ARGUMENTS`: Path to docker compose file (defaults to ./docker-compose.yml)
 
 ## Execution Steps
 
@@ -36,12 +36,12 @@ cat -n "$COMPOSE_FILE"
 echo ""
 echo "=== SYNTAX VALIDATION ==="
 
-# Use docker-compose config to validate
-if docker-compose -f "$COMPOSE_FILE" config --quiet 2>/dev/null; then
+# Use docker compose config to validate
+if docker compose -f "$COMPOSE_FILE" config --quiet 2>/dev/null; then
     echo "[PASS] Syntax is valid"
 else
     echo "[FAIL] Syntax errors:"
-    docker-compose -f "$COMPOSE_FILE" config 2>&1
+    docker compose -f "$COMPOSE_FILE" config 2>&1
 fi
 ```
 
@@ -62,12 +62,12 @@ fi
 # List services
 echo ""
 echo "Services defined:"
-docker-compose -f "$COMPOSE_FILE" config --services 2>/dev/null
+docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null
 
 # List volumes
 echo ""
 echo "Volumes defined:"
-docker-compose -f "$COMPOSE_FILE" config --volumes 2>/dev/null || echo "(none)"
+docker compose -f "$COMPOSE_FILE" config --volumes 2>/dev/null || echo "(none)"
 
 # List networks
 echo ""

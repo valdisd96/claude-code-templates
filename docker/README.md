@@ -37,7 +37,7 @@ git clone https://github.com/uvauchok/claude-code-templates.git
 | `/troubleshoot` | Diagnose Docker issues |
 | `/logs [container]` | View container logs |
 | `/exec [container] [cmd]` | Run command in container |
-| `/compose-up` | Start docker-compose services |
+| `/compose-up` | Start docker compose services |
 | `/compose-validate` | Validate docker-compose.yml |
 
 ## Usage Examples
