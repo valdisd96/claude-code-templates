@@ -59,7 +59,7 @@ Persistent memory across sessions:
 ### Compose Commands
 | Command | Purpose |
 |---------|---------|
-| `/compose-up` | Start services with docker-compose |
+| `/compose-up` | Start services with docker compose |
 | `/compose-validate` | Validate docker-compose.yml syntax and structure |
 
 ## Dockerfile Best Practices
@@ -276,12 +276,12 @@ docker image history image
 docker tag source target
 
 # Compose
-docker-compose up -d
-docker-compose down
-docker-compose logs
-docker-compose ps
-docker-compose build
-docker-compose exec service command
+docker compose up -d
+docker compose down
+docker compose logs
+docker compose ps
+docker compose build
+docker compose exec service command
 
 # Cleanup (safe)
 docker container prune

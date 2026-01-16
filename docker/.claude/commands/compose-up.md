@@ -22,9 +22,9 @@ if [ ! -f "$COMPOSE_FILE" ]; then
 fi
 
 echo "=== Validating: $COMPOSE_FILE ==="
-docker-compose config --quiet && echo "Configuration valid" || {
+docker compose config --quiet && echo "Configuration valid" || {
     echo "Configuration errors found:"
-    docker-compose config 2>&1
+    docker compose config 2>&1
     exit 1
 }
 ```
@@ -34,11 +34,11 @@ docker-compose config --quiet && echo "Configuration valid" || {
 ```bash
 echo ""
 echo "=== Defined Services ==="
-docker-compose config --services
+docker compose config --services
 
 echo ""
 echo "=== Current Status ==="
-docker-compose ps 2>/dev/null || echo "No containers running"
+docker compose ps 2>/dev/null || echo "No containers running"
 ```
 
 ### Phase 3: Start Services
@@ -61,9 +61,9 @@ echo "=== Starting Services ==="
 
 if [ -n "$BUILD_FLAG" ]; then
     echo "Rebuilding images..."
-    docker-compose up -d --build $SERVICES
+    docker compose up -d --build $SERVICES
 else
-    docker-compose up -d $SERVICES
+    docker compose up -d $SERVICES
 fi
 ```
 
@@ -76,11 +76,11 @@ sleep 3
 
 echo ""
 echo "=== Service Status ==="
-docker-compose ps
+docker compose ps
 
 echo ""
 echo "=== Recent Logs (last 20 lines per service) ==="
-docker-compose logs --tail 20
+docker compose logs --tail 20
 ```
 
 ### Phase 5: Health Check
@@ -88,8 +88,8 @@ docker-compose logs --tail 20
 ```bash
 echo ""
 echo "=== Health Status ==="
-docker-compose ps --format json 2>/dev/null | jq -r '.[] | "\(.Name): \(.State) \(.Health // "no healthcheck")"' 2>/dev/null || \
-docker-compose ps
+docker compose ps --format json 2>/dev/null | jq -r '.[] | "\(.Name): \(.State) \(.Health // "no healthcheck")"' 2>/dev/null || \
+docker compose ps
 ```
 
 ## Common Operations
