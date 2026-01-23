@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-migration-job
+  labels:
+{{- if .Values.migrations.annotations }}
+  annotations:
+    {{- toYaml .Values.migrations.annotations | nindent 4 }}
+{{- end }}
+  helm.sh/hook-weight: "-1"
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migrations.activeDeadlineSeconds }}
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-migration-job-pod
+      labels:
+        app: {{ .Chart.Name }}-migration-job-pod
+    spec:
+      restartPolicy: {{ .Values.migrations.restartPolicy }}
+      containers:
+      - name: {{ .Chart.Name }}-db-migrations
+        image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -xue
+            echo "Run postgres migrations:"
+            export JAVA_OPTS="{{ .Values.java.javaOpts }}"
+            export LANG=C.UTF-8 && gradle update -Pdb=postgres \
+              -PpostgresUrl=jdbc:postgresql://${MAIN_DB_HOST}:${MAIN_DB_PORT}/${MAIN_DB_NAME} \
+              -PpostgresUsername=${POSTGRES_DB_USERNAME} \
+              -PpostgresPassword=${POSTGRES_DB_PASSWORD}{{ if .Values.migrations.insertTestData }} \
+              -PinsertTestData=true{{ end }}
+            echo "Run clickhouse migrations:"
+            export LANG=C.UTF-8 && gradle update -Pdb=clickhouse \
+              -PclickhouseUrl="jdbc:clickhouse://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}/${CLICKHOUSE_DATABASE}?user=${CLICKHOUSE_USERNAME}&password=${CLICKHOUSE_PASSWORD}&ssl=true"
+        envFrom:
+          - secretRef:
+              name: {{ include "chart.fullname" . }}-env-sensitive
+          - configMapRef:
+              name: {{ include "chart.fullname" . }}-env-nonsensitive
+{{- with .Values.migrations.resources }}
+        resources:
+{{ toYaml . | nindent 10 }}
+{{- end }}
+      imagePullSecrets:
+{{- range .Values.imagePullSecrets }}
+      - name: {{ . }}
+{{- end }}
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}

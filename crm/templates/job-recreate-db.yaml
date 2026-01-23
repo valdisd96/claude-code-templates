@@ -1,0 +1,51 @@
+{{- if .Values.database.main.recreateDB }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-recreate-db
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-20"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-recreate-db-pod
+      labels:
+        app: {{ .Chart.Name }}-recreate-db
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: recreate-db
+          image: "{{ .Values.database.main.postgres.image }}:{{ .Values.database.main.postgres.tag }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -ue
+              echo "Dropping DB if exists"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "SELECT 1 FROM pg_database WHERE datname = '${MAIN_DB_NAME}'" | grep -q 1 && \
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${MAIN_DB_NAME}' AND pid <> pg_backend_pid();" && \
+              PGPASSWORD=${POSTGRES_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${POSTGRES_DB_USERNAME} -d postgres -c "DROP DATABASE \"${MAIN_DB_NAME}\";"
+              echo "Creating DB if does not exist"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "SELECT 1 FROM pg_database WHERE datname = '${MAIN_DB_NAME}'" | grep -q 1 && echo "Current database exists... skip" || \
+              PGPASSWORD=${POSTGRES_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${POSTGRES_DB_USERNAME} -d postgres -c "CREATE DATABASE \"${MAIN_DB_NAME}\";"
+              
+              echo "Grant all privileges to USER"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"${MAIN_DB_NAME}\" TO \"${POSTGRES_DB_USERNAME}\";"
+
+              echo "Creating extension if not exists"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d ${MAIN_DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;"
+              sleep 1
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-env-sensitive
+            - configMapRef:
+                name: {{ include "chart.fullname" . }}-env-nonsensitive
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-db-admin
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
+      {{- end }}

@@ -1,0 +1,5 @@
+creation_rules:
+        - path_regex: \.notprod\.yaml$
+          pgp: '6606 1A44 827D C8F7 8860  6911 1EA2 6CE8 6507 BB9A'
+        - path_regex: \.prod\.yaml$
+          pgp: '758D FC40 C88E B240 CD2C  6D7B 7D88 3F34 9E78 B0FC'

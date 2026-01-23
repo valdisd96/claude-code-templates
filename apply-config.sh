@@ -1,6 +1,6 @@
 #!/bin/bash
 # Claude Code Configuration Installer
-# Usage: ./apply-config.sh <domain> <target-project-path>
+# Usage: ./apply-config.sh <domain> <target-project-path> [--sync]
 # Usage: ./apply-config.sh --list
 
 set -e
@@ -21,14 +21,19 @@ usage() {
     echo -e "${BLUE}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo "Usage:"
-    echo "  $0 <domain> <target-path>    Apply configuration to project"
-    echo "  $0 --list                    List available configurations"
-    echo "  $0 --help                    Show this help"
+    echo "  $0 <domain> <target-path>           Apply configuration to project"
+    echo "  $0 <domain> <target-path> --sync    Apply and remove orphaned files"
+    echo "  $0 --list                           List available configurations"
+    echo "  $0 --help                           Show this help"
+    echo ""
+    echo "Options:"
+    echo "  --sync    Remove files in target that don't exist in template"
+    echo "            (affects .claude/commands/, .claude/skills/ only)"
     echo ""
     echo "Examples:"
     echo "  $0 tfx /path/to/ml-project"
-    echo "  $0 kubernetes ~/my-k8s-project"
-    echo "  $0 helm ."
+    echo "  $0 kubernetes ~/my-k8s-project --sync"
+    echo "  $0 helm . --sync"
     echo ""
 }
 
@@ -61,10 +66,36 @@ list_domains() {
 # Prompt for action on existing file
 prompt_action() {
     local file="$1"
-    echo -e "${YELLOW}File exists: $file${NC}"
-    read -p "  [o]verwrite / [s]kip / [b]ackup+overwrite? " -n 1 -r
-    echo
+    echo -e "${YELLOW}File exists: $file${NC}" >&2
+    read -p "  [o]verwrite / [s]kip / [b]ackup+overwrite? " -n 1 -r </dev/tty
+    echo >&2
     echo "$REPLY"
+}
+
+# Remove orphaned files (files in target but not in source)
+remove_orphans() {
+    local src_dir="$1"
+    local dst_dir="$2"
+    local pattern="${3:-*}"
+    local removed=0
+
+    if [ ! -d "$dst_dir" ]; then
+        return 0
+    fi
+
+    for dst_file in "$dst_dir"/$pattern; do
+        [ -e "$dst_file" ] || continue
+        local basename=$(basename "$dst_file")
+        local src_file="$src_dir/$basename"
+
+        if [ ! -e "$src_file" ]; then
+            echo -e "${RED}  ✗ Removing orphan: $dst_file${NC}"
+            rm -rf "$dst_file"
+            ((removed++))
+        fi
+    done
+
+    echo "$removed"
 }
 
 # Copy file with conflict handling
@@ -99,6 +130,7 @@ copy_file() {
 install_config() {
     local domain="$1"
     local target="$2"
+    local sync_mode="$3"
     local domain_dir="$SCRIPT_DIR/$domain"
 
     # Validate domain exists
@@ -118,11 +150,16 @@ install_config() {
     target="$(cd "$target" && pwd)"
 
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║   Installing: $domain ${NC}"
+    if [ "$sync_mode" = "true" ]; then
+        echo -e "${GREEN}║   Installing: $domain (sync mode) ${NC}"
+    else
+        echo -e "${GREEN}║   Installing: $domain ${NC}"
+    fi
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${BLUE}Source:${NC} $domain_dir"
     echo -e "${BLUE}Target:${NC} $target"
+    [ "$sync_mode" = "true" ] && echo -e "${YELLOW}Sync:${NC} Will remove orphaned files"
     echo ""
 
     # Copy CLAUDE.md
@@ -156,6 +193,13 @@ install_config() {
                 cmd_name=$(basename "$cmd")
                 copy_file "$cmd" "$target/.claude/commands/$cmd_name"
             done
+
+            # Remove orphaned commands in sync mode
+            if [ "$sync_mode" = "true" ]; then
+                echo ""
+                echo -e "${BLUE}Syncing commands (removing orphans)...${NC}"
+                remove_orphans "$domain_dir/.claude/commands" "$target/.claude/commands" "*.md"
+            fi
         fi
 
         # Skills (if exist)
@@ -171,6 +215,13 @@ install_config() {
                     copy_file "$skill_file" "$target/.claude/skills/$skill_name/$(basename "$skill_file")"
                 done
             done
+
+            # Remove orphaned skills in sync mode
+            if [ "$sync_mode" = "true" ]; then
+                echo ""
+                echo -e "${BLUE}Syncing skills (removing orphans)...${NC}"
+                remove_orphans "$domain_dir/.claude/skills" "$target/.claude/skills" "*"
+            fi
         fi
     fi
 
@@ -215,6 +266,10 @@ case "${1:-}" in
             usage
             exit 1
         fi
-        install_config "$1" "$2"
+        sync_mode="false"
+        if [ "${3:-}" = "--sync" ]; then
+            sync_mode="true"
+        fi
+        install_config "$1" "$2" "$sync_mode"
         ;;
 esac

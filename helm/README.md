@@ -1,16 +1,13 @@
 # Helm Charts Claude Code Configuration
 
-A comprehensive Claude Code configuration for Helm chart development, validation, debugging, and security analysis.
+A focused Claude Code configuration for Helm chart development and debugging.
 
 ## Features
 
-- **Memory Bank System** - Persistent context about charts, values, and decisions across sessions
-- **Chart Validation** - Comprehensive linting and structure checks
-- **Template Debugging** - Render and debug templates with custom values
-- **Values Analysis** - Deep analysis of values.yaml structure and types
-- **Dependency Management** - Subchart analysis, version checks, lock file status
-- **Security Scanning** - Pod Security Standards, RBAC, NetworkPolicy checks
-- **Auto-Triggered Skills** - Expert guidance on templates, values, and security
+- **Chart Validation** - Lint and template rendering checks
+- **Template Debugging** - Diagnose rendering errors with specific fixes
+- **Values Comparison** - Diff values files across environments
+- **Auto-Triggered Skills** - Context-aware help for templates, values, security
 - **Safe Permissions** - Dry-run by default, destructive commands blocked
 
 ## Installation
@@ -28,21 +25,11 @@ A comprehensive Claude Code configuration for Helm chart development, validation
 
 ## Available Commands
 
-### Memory Bank
 | Command | Description |
 |---------|-------------|
-| `/init-memory-bank` | Analyze chart repository, create persistent documentation |
-| `/update-memory-bank` | Update docs based on recent changes |
-
-### Chart Development
-| Command | Description |
-|---------|-------------|
-| `/validate-chart [path]` | Lint and validate chart structure |
-| `/debug-template [name]` | Render and debug specific template |
-| `/analyze-values [file]` | Deep analysis of values.yaml structure |
-| `/analyze-dependencies [path]` | Subchart analysis, version checks |
+| `/validate-chart [path]` | Lint and test template rendering |
+| `/debug-template [name]` | Render and debug a specific template |
 | `/diff-values <f1> <f2>` | Compare two values files |
-| `/security-scan [path]` | Security best practices check |
 
 ## Skills (Auto-Triggered)
 
@@ -50,127 +37,64 @@ A comprehensive Claude Code configuration for Helm chart development, validation
 |-------|----------------|
 | `template-debugging` | Go template errors, `{{` syntax issues |
 | `values-patterns` | Working with values.yaml, structure questions |
-| `chart-security` | SecurityContext, RBAC, NetworkPolicy |
-
-## Memory Bank Structure
-
-After running `/init-memory-bank`, your chart repository will have:
-
-```
-docs/memory-bank/
-├── chartbrief.md       # Chart overview, maintainers
-├── valuesContext.md    # Values hierarchy, types, flags
-├── templatePatterns.md # Named templates, helpers
-├── releaseContext.md   # Environments, dependencies
-├── activeContext.md    # Current session notes
-└── progress.md         # Work tracking
-```
+| `chart-security` | SecurityContext, RBAC questions |
 
 ## Permissions
 
 ### Allowed (Safe Operations)
 - `helm lint`, `template`, `show`, `search`
-- `helm dependency`, `repo`, `list`, `status`, `history`
+- `helm dependency`, `repo`, `list`, `status`
 - `helm install --dry-run`, `helm upgrade --dry-run`
-- `helm package`, `verify`, `pull`, `create`
-- `kubectl apply --dry-run`, `kubectl diff`, `kubectl explain`
+- `kubectl apply --dry-run`, `kubectl diff`
 - `yq`, `jq` for YAML/JSON processing
 
 ### Denied (Destructive Operations)
-- `helm install` (without --dry-run)
-- `helm upgrade` (without --dry-run)
-- `helm uninstall`, `helm delete`
-- `helm rollback`
-- `kubectl apply`, `create`, `delete`, `patch`
-
-## MCP Servers
-
-This configuration includes MCP servers for enhanced capabilities:
-
-| Server | Purpose |
-|--------|---------|
-| `filesystem` | Navigate chart structures, read templates |
-| `memory` | Maintain context across sessions |
-
-## Requirements
-
-- `helm` v3.x installed
-- Optional: `kubectl` for cluster-targeted dry-runs
-- Optional: `yq` for YAML processing
-- Optional: `jq` for JSON processing
-
-## Customization
-
-### Enable Actual Deployments
-Edit `.claude/settings.json` to allow install/upgrade:
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(helm install*)",
-      "Bash(helm upgrade*)"
-    ]
-  }
-}
-```
-
-### Add Custom Repositories
-```json
-{
-  "env": {
-    "HELM_REPO_BITNAMI": "https://charts.bitnami.com/bitnami"
-  }
-}
-```
+- `helm install/upgrade` (without --dry-run)
+- `helm uninstall`, `helm delete`, `helm rollback`
+- `kubectl apply/create/delete` (without --dry-run)
 
 ## Quick Start
 
-1. **Apply configuration** to your charts project
-2. **Run `/init-memory-bank`** to analyze and document your charts
-3. **Use `/validate-chart`** to check chart health
-4. **Use `/debug-template`** when templates don't render correctly
-5. **Run `/security-scan`** before deploying to production
-
-## Example Workflow
-
 ```bash
-# Start session - Claude will read Memory Bank automatically
-
 # Validate chart
 /validate-chart ./my-chart
 
 # Debug a specific template
 /debug-template deployment
 
-# Analyze values structure
-/analyze-values
-
-# Compare dev vs prod values
+# Compare values
 /diff-values values.yaml values-prod.yaml
-
-# Security check before release
-/security-scan
-
-# End session - update Memory Bank
-/update-memory-bank
 ```
+
+## Chart Conventions
+
+This configuration follows these conventions (based on production charts):
+
+- Helper names use `chart.*` prefix (e.g., `chart.fullname`, `chart.labels`)
+- Image config split: `image.repository`, `image.name`, `image.tag`
+- Feature flags use `.enabled` pattern
+- Affinity defined as template strings (rendered with `tpl`)
+- Minimal security context by default
+
+## Requirements
+
+- `helm` v3.x installed
+- Optional: `kubectl` for cluster-targeted dry-runs
+- Optional: `yq` for YAML processing
 
 ## Troubleshooting
 
 ### Template Errors
-- Use `/debug-template [name]` for detailed rendering output
-- Check for nil pointer errors (missing values)
-- Verify whitespace control with `{{-` and `-}}`
+Run `/debug-template [name]` - it will:
+1. Render the template with `--debug`
+2. Identify the specific error type
+3. Suggest the fix
 
-### Values Issues
-- Run `/analyze-values` to understand structure
-- Check for type mismatches (string vs int)
-- Use `/diff-values` to compare environments
-
-### Dependency Problems
-- Run `/analyze-dependencies` to check status
-- Verify Chart.lock is in sync
-- Check repository availability
+### Common Fixes
+- `nil pointer` → Add `{{- if .Values.X }}` check or `| default`
+- `can't evaluate field` → Use `$` instead of `.` inside `range`
+- Type mismatch → Use `| toString` or `| int`
+- Bad YAML → Check `nindent` vs `indent` usage
 
 ## License
 
