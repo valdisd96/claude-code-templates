@@ -1,0 +1,172 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "chart.fullname" . }}-env-nonsensitive
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-30"
+  labels:
+    {{- include "chart.labelsConfigmapSecret" . | nindent 4 }}
+data:
+  GLOBAL_DOMAIN_URL: {{ tpl .Values.appConfig.domain . }}
+  POSTGRES_DB_URL: jdbc:postgresql://${MAIN_DB_HOST}:${MAIN_DB_PORT}/${MAIN_DB_NAME}
+  CLICKHOUSE_URL: https://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}
+  HIKARI_MINIMUM_IDLE: {{ .Values.database.main.minimumIdle | quote  }}
+  HIKARI_MAXIMUM_POOL_SIZE: {{ .Values.database.main.maximumPoolSize | quote  }}
+  JAVA_XMS: {{ .Values.java.javaXms | quote }}
+  JAVA_XMX: {{ .Values.java.javaXmx | quote }}
+{{- if .Values.jmxAgent.enabled }}
+  JAVA_OPTS: {{ .Values.java.javaOpts }} {{ tpl .Values.jmxAgent.javaOpts . }}
+{{- else }}
+  JAVA_OPTS: {{ .Values.java.javaOpts | quote }}
+{{- end }}
+  OPENSEARCH_HOST: {{ .Values.openSearch.host }}
+  OPENSEARCH_PROTO: {{ .Values.openSearch.protocol }}
+  OPENSEARCH_PORT: {{ .Values.openSearch.port | quote }}
+  OPENSEARCH_URL: {{ .Values.openSearch.url }}
+  OPENSEARCH_INDEX: {{ tpl .Values.openSearch.index . }}
+
+  MAIN_DB_HOST: {{ .Values.database.main.host | quote }}
+  MAIN_DB_PORT: {{ .Values.database.main.port | quote }}
+  MAIN_DB_NAME: {{ include "chart.db_name" . | quote }}
+  POSTGRES_DB_USERNAME: {{ include "chart.db_username" . | quote }}
+
+  AWS_REGION: {{ .Values.glue.awsRegion | quote }}
+  ACCOUNT_ID: {{ .Values.kafka.acountId | quote }}
+  MSK_IAM_ROLE_NAME: {{ .Values.kafka.mskIamRoleName | quote }}
+  MSK_IAM_STATIC_SESSION_NAME: {{ .Values.kafka.mskIamStaticSessionName | quote }}
+  SCHEMA_REGISTRY_NAME: {{ .Values.kafka.schemaRegistryName | quote }}
+  SCHEMA_REGISTRY_URL: {{ .Values.kafka.springKafkaConsumerPropertiesSchemaRegistry | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.springKafkaBootstrapServers | quote }}
+
+  KAFKA_TOPICS_USER_ACTION_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.userAction.name }}
+  KAFKA_TOPICS_USER_ACTION_CONCURRENCY: {{ .Values.kafka.topics.userAction.concurrency | quote }}
+  KAFKA_TOPICS_USER_ACTION_PARTITIONS: {{ .Values.kafka.topics.userAction.partitions | quote }}
+  KAFKA_TOPICS_USER_ACTION_REPLICAS: {{ .Values.kafka.topics.userAction.replicas | quote }}
+  KAFKA_TOPICS_USER_ACTION_RETENTION_BYTES: {{ .Values.kafka.topics.userAction.retentionBytes | quote }}
+  KAFKA_TOPICS_USER_ACTION_RETENTION_MS: {{ .Values.kafka.topics.userAction.retentionMs | quote }}
+
+  KAFKA_TOPICS_USER_INFO_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.userInfo.name }}
+  KAFKA_TOPICS_USER_INFO_CONCURRENCY: {{ .Values.kafka.topics.userInfo.concurrency | quote }}
+  KAFKA_TOPICS_USER_INFO_PARTITIONS: {{ .Values.kafka.topics.userInfo.partitions | quote }}
+  KAFKA_TOPICS_USER_INFO_REPLICAS: {{ .Values.kafka.topics.userInfo.replicas | quote }}
+  KAFKA_TOPICS_USER_INFO_RETENTION_BYTES: {{ .Values.kafka.topics.userInfo.retentionBytes | quote }}
+  KAFKA_TOPICS_USER_INFO_RETENTION_MS: {{ .Values.kafka.topics.userInfo.retentionMs | quote }}
+
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.workflowTriggerEvent.name }}
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_CONCURRENCY: {{ .Values.kafka.topics.workflowTriggerEvent.concurrency | quote }}
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_PARTITIONS: {{ .Values.kafka.topics.workflowTriggerEvent.partitions | quote }}
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_REPLICAS: {{ .Values.kafka.topics.workflowTriggerEvent.replicas | quote }}
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_RETENTION_BYTES: {{ .Values.kafka.topics.workflowTriggerEvent.retentionBytes | quote }}
+  KAFKA_TOPICS_WORKFLOW_TRIGGER_EVENT_RETENTION_MS: {{ .Values.kafka.topics.workflowTriggerEvent.retentionMs | quote }}
+
+  KAFKA_TOPICS_TEMPLATE_ACTION_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.templateAction.name }}
+  KAFKA_TOPICS_TEMPLATE_ACTION_CONCURRENCY: {{ .Values.kafka.topics.templateAction.concurrency | quote }}
+  KAFKA_TOPICS_TEMPLATE_ACTION_PARTITIONS: {{ .Values.kafka.topics.templateAction.partitions | quote }}
+  KAFKA_TOPICS_TEMPLATE_ACTION_REPLICAS: {{ .Values.kafka.topics.templateAction.replicas | quote }}
+  KAFKA_TOPICS_TEMPLATE_ACTION_RETENTION_BYTES: {{ .Values.kafka.topics.templateAction.retentionBytes | quote }}
+  KAFKA_TOPICS_TEMPLATE_ACTION_RETENTION_MS: {{ .Values.kafka.topics.templateAction.retentionMs | quote }}
+
+  KAFKA_TOPICS_DELIVERY_ACTION_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.deliveryAction.name }}
+  KAFKA_TOPICS_DELIVERY_ACTION_CONCURRENCY: {{ .Values.kafka.topics.deliveryAction.concurrency | quote }}
+  KAFKA_TOPICS_DELIVERY_ACTION_PARTITIONS: {{ .Values.kafka.topics.deliveryAction.partitions | quote }}
+  KAFKA_TOPICS_DELIVERY_ACTION_REPLICAS: {{ .Values.kafka.topics.deliveryAction.replicas | quote }}
+  KAFKA_TOPICS_DELIVERY_ACTION_RETENTION_BYTES: {{ .Values.kafka.topics.deliveryAction.retentionBytes | quote }}
+  KAFKA_TOPICS_DELIVERY_ACTION_RETENTION_MS: {{ .Values.kafka.topics.deliveryAction.retentionMs | quote }}
+
+  KAFKA_TOPICS_DELIVERY_BATCH_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.deliveryBatch.name }}
+  KAFKA_TOPICS_DELIVERY_BATCH_CONCURRENCY: {{ .Values.kafka.topics.deliveryBatch.concurrency | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_PARTITIONS: {{ .Values.kafka.topics.deliveryBatch.partitions | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_REPLICAS: {{ .Values.kafka.topics.deliveryBatch.replicas | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETENTION_BYTES: {{ .Values.kafka.topics.deliveryBatch.retentionBytes | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETENTION_MS: {{ .Values.kafka.topics.deliveryBatch.retentionMs | quote }}
+
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.deliveryBatchRetry.name }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_CONCURRENCY: {{ .Values.kafka.topics.deliveryBatchRetry.concurrency | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_PARTITIONS: {{ .Values.kafka.topics.deliveryBatchRetry.partitions | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_REPLICAS: {{ .Values.kafka.topics.deliveryBatchRetry.replicas | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_RETENTION_BYTES: {{ .Values.kafka.topics.deliveryBatchRetry.retentionBytes | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_RETRY_RETENTION_MS: {{ .Values.kafka.topics.deliveryBatchRetry.retentionMs | quote }}
+
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.deliveryBatchDlq.name }}
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_CONCURRENCY: {{ .Values.kafka.topics.deliveryBatchDlq.concurrency | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_PARTITIONS: {{ .Values.kafka.topics.deliveryBatchDlq.partitions | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_REPLICAS: {{ .Values.kafka.topics.deliveryBatchDlq.replicas | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_RETENTION_BYTES: {{ .Values.kafka.topics.deliveryBatchDlq.retentionBytes | quote }}
+  KAFKA_TOPICS_DELIVERY_BATCH_DLQ_RETENTION_MS: {{ .Values.kafka.topics.deliveryBatchDlq.retentionMs | quote }}
+
+  KAFKA_TOPICS_CACHE_INVALIDATION_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.cacheInvalidation.name }}
+  KAFKA_TOPICS_CACHE_INVALIDATION_CONCURRENCY: {{ .Values.kafka.topics.cacheInvalidation.concurrency | quote }}
+  KAFKA_TOPICS_CACHE_INVALIDATION_PARTITIONS: {{ .Values.kafka.topics.cacheInvalidation.partitions | quote }}
+  KAFKA_TOPICS_CACHE_INVALIDATION_REPLICAS: {{ .Values.kafka.topics.cacheInvalidation.replicas | quote }}
+  KAFKA_TOPICS_CACHE_INVALIDATION_RETENTION_BYTES: {{ .Values.kafka.topics.cacheInvalidation.retentionBytes | quote }}
+  KAFKA_TOPICS_CACHE_INVALIDATION_RETENTION_MS: {{ .Values.kafka.topics.cacheInvalidation.retentionMs | quote }}
+
+  KAFKA_TOPICS_GAME_INFO_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.gameInfo.name }}
+  KAFKA_TOPICS_GAME_INFO_CONCURRENCY: {{ .Values.kafka.topics.gameInfo.concurrency | quote }}
+  KAFKA_TOPICS_GAME_INFO_PARTITIONS: {{ .Values.kafka.topics.gameInfo.partitions | quote }}
+  KAFKA_TOPICS_GAME_INFO_REPLICAS: {{ .Values.kafka.topics.gameInfo.replicas | quote }}
+  KAFKA_TOPICS_GAME_INFO_RETENTION_BYTES: {{ .Values.kafka.topics.gameInfo.retentionBytes | quote }}
+  KAFKA_TOPICS_GAME_INFO_RETENTION_MS: {{ .Values.kafka.topics.gameInfo.retentionMs | quote }}
+
+  KAFKA_TOPICS_INIT_MIGRATION_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.initMigration.name }}
+  KAFKA_TOPICS_INIT_MIGRATION_CONCURRENCY: {{ .Values.kafka.topics.initMigration.concurrency | quote }}
+  KAFKA_TOPICS_INIT_MIGRATION_PARTITIONS: {{ .Values.kafka.topics.initMigration.partitions | quote }}
+  KAFKA_TOPICS_INIT_MIGRATION_REPLICAS: {{ .Values.kafka.topics.initMigration.replicas | quote }}
+  KAFKA_TOPICS_INIT_MIGRATION_RETENTION_BYTES: {{ .Values.kafka.topics.initMigration.retentionBytes | quote }}
+  KAFKA_TOPICS_INIT_MIGRATION_RETENTION_MS: {{ .Values.kafka.topics.initMigration.retentionMs | quote }}
+
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.migrationMaintenance.name }}
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_CONCURRENCY: {{ .Values.kafka.topics.migrationMaintenance.concurrency | quote }}
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_PARTITIONS: {{ .Values.kafka.topics.migrationMaintenance.partitions | quote }}
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_REPLICAS: {{ .Values.kafka.topics.migrationMaintenance.replicas | quote }}
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_RETENTION_BYTES: {{ .Values.kafka.topics.migrationMaintenance.retentionBytes | quote }}
+  KAFKA_TOPICS_MIGRATION_MAINTENANCE_RETENTION_MS: {{ .Values.kafka.topics.migrationMaintenance.retentionMs | quote }}
+
+  KAFKA_TOPICS_PLAYER_TAGS_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.playerTags.name }}
+  KAFKA_TOPICS_PLAYER_TAGS_CONCURRENCY: {{ .Values.kafka.topics.playerTags.concurrency | quote }}
+  KAFKA_TOPICS_PLAYER_TAGS_PARTITIONS: {{ .Values.kafka.topics.playerTags.partitions | quote }}
+  KAFKA_TOPICS_PLAYER_TAGS_REPLICAS: {{ .Values.kafka.topics.playerTags.replicas | quote }}
+  KAFKA_TOPICS_PLAYER_TAGS_RETENTION_BYTES: {{ .Values.kafka.topics.playerTags.retentionBytes | quote }}
+  KAFKA_TOPICS_PLAYER_TAGS_RETENTION_MS: {{ .Values.kafka.topics.playerTags.retentionMs | quote }}
+
+  KAFKA_TOPICS_INGESTION_EVENT_NAME: {{ .Release.Namespace }}.{{ include "chart.name" . }}.{{ .Values.kafka.topics.ingestionEvent.name }}
+  KAFKA_TOPICS_INGESTION_EVENT_CONCURRENCY: {{ .Values.kafka.topics.ingestionEvent.concurrency | quote }}
+  KAFKA_TOPICS_INGESTION_EVENT_PARTITIONS: {{ .Values.kafka.topics.ingestionEvent.partitions | quote }}
+  KAFKA_TOPICS_INGESTION_EVENT_REPLICAS: {{ .Values.kafka.topics.ingestionEvent.replicas | quote }}
+  KAFKA_TOPICS_INGESTION_EVENT_RETENTION_BYTES: {{ .Values.kafka.topics.ingestionEvent.retentionBytes | quote }}
+  KAFKA_TOPICS_INGESTION_EVENT_RETENTION_MS: {{ .Values.kafka.topics.ingestionEvent.retentionMs | quote }}
+
+
+  MAIN_CLICK_DB_HOST: {{ .Values.database.clickhouse.host | quote }}
+  MAIN_CLICK_DB_PORT: {{ .Values.database.clickhouse.port | quote }}
+  CLICKHOUSE_DATABASE: {{ include "chart.db_click_name" . | quote }}
+  CLICKHOUSE_USERNAME: {{ include "chart.db_click_username" . | quote }}
+  CLICKHOUSE_INSERT_MAX_CONNECTIONS: {{ .Values.database.clickhouse.insertMaxConnections | quote }}
+  CLICKHOUSE_INSERT_THREAD_COUNT: {{ .Values.database.clickhouse.insertThreadCount | quote }}
+  CLICKHOUSE_QUERY_MAX_CONNECTIONS: {{ .Values.database.clickhouse.queryMaxConnections | quote }}
+
+  CURRENCY_EXCHANGE_URL: {{ .Values.currencyExchange.url | quote }}
+
+  COMMUNICATION_DO_SEND: {{ .Values.appConfig.communicationDoSend | quote }}
+  REQUEST_EXPIRES_IN_SECONDS: {{ .Values.appConfig.requestExpiresInSeconds | quote }}
+
+  AWS_CLOUDFRONT_PRIVATE_KEY_PATH: {{ .Values.cloudfront.asset.privateKeyPath }}
+  AWS_CLOUDFRONT_KEY_PAIR_ID: {{ .Values.cloudfront.asset.keyPairId }}
+  AWS_CLOUDFRONT_DOMAIN: {{ .Values.cloudfront.asset.domain }}
+  AWS_CLOUDFRONT_ALTERNATE_DOMAIN: {{ .Values.cloudfront.asset.alternateDomain }}
+
+  AWS_S3_BUCKET: {{ .Values.s3.asset.bucket }}
+  AWS_S3_REGION: {{ .Values.s3.asset.region }}
+  AWS_S3_PREFIX: {{ .Release.Namespace }}/
+
+  GLOBAL_ENV: {{ .Release.Namespace }}
+  SECURITY_AUTH_ENABLED: {{ .Values.appConfig.securityAuthEnabled | quote }}
+  AUTHORIZATION_SERVER_URI: {{ .Values.appConfig.authorizationServerUri | quote }}
+
+  {{- if .Values.datadog.enabled }}
+  DD_DATA_STREAMS_ENABLED: "true"
+  {{- end }}
+
+  GLOBAL_FE_DOMAIN_URL:  {{ tpl .Values.appConfig.frontendUrl . | quote }}

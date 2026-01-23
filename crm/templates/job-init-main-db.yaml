@@ -1,0 +1,57 @@
+{{- if eq .Values.database.main.dbDev "true" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-init-db
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-20"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-init-db-pod
+      labels:
+        app: {{ .Chart.Name }}-init-db
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: init-db
+          image: "{{ .Values.database.main.postgres.image }}:{{ .Values.database.main.postgres.tag }}"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Creating USER if does not exist"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "SELECT 1 FROM pg_user WHERE usename = '${POSTGRES_DB_USERNAME}'" | grep -q 1 && echo "Current user exists... skip" || \
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "CREATE ROLE \"${POSTGRES_DB_USERNAME}\" LOGIN ENCRYPTED PASSWORD '${POSTGRES_DB_PASSWORD}';" && \
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "ALTER USER \"${POSTGRES_DB_USERNAME}\" CREATEDB;"
+              
+              echo "Creating DB if does not exist"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "SELECT 1 FROM pg_database WHERE datname = '${MAIN_DB_NAME}'" | grep -q 1 && echo "Current database exists... skip" || \
+              PGPASSWORD=${POSTGRES_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${POSTGRES_DB_USERNAME} -d postgres -c "CREATE DATABASE \"${MAIN_DB_NAME}\";"
+              
+              echo "Grant all privileges to USER"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"${MAIN_DB_NAME}\" TO \"${POSTGRES_DB_USERNAME}\";"
+
+              echo "Creating extension if not exists"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d ${MAIN_DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;"
+
+              echo "Grant all privileges to USER on schema public"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d ${MAIN_DB_NAME} -c "GRANT CREATE, USAGE ON SCHEMA public TO \"${POSTGRES_DB_USERNAME}\";"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d ${MAIN_DB_NAME} -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"${POSTGRES_DB_USERNAME}\";"
+              PGPASSWORD=${ADMIN_DB_PASSWORD} psql -h ${MAIN_DB_HOST} -p ${MAIN_DB_PORT} -U ${ADMIN_DB_USER} -d ${MAIN_DB_NAME} -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"${POSTGRES_DB_USERNAME}\";"
+
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-env-sensitive
+            - configMapRef:
+                name: {{ include "chart.fullname" . }}-env-nonsensitive
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-db-admin
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
+      {{- end }}

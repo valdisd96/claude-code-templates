@@ -1,0 +1,51 @@
+{{- if .Values.database.main.recreateDB }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-recreate-clickhouse-db
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-20"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ .Chart.Name }}-recreate-click-db-pod
+      labels:
+        app: {{ .Chart.Name }}-recreate-click-db
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: recreate-click-db
+          image: repository.spribe.io/dockerhub/curlimages/curl:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Dropping Clickhouse DB if exists"
+              curl --fail -u ${ADMIN_CLICK_DB_USER}:"${ADMIN_CLICK_DB_PASSWORD}" -X POST \
+                "https://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}/" \
+                --data-binary "DROP DATABASE IF EXISTS ${CLICKHOUSE_DATABASE};"
+
+              echo "Creating database ${CLICKHOUSE_DATABASE} and give permission to ${CLICKHOUSE_USERNAME}"
+              curl --fail -u ${ADMIN_CLICK_DB_USER}:"${ADMIN_CLICK_DB_PASSWORD}" -X POST \
+                "https://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}/" \
+                --data-binary "CREATE USER IF NOT EXISTS ${CLICKHOUSE_USERNAME} IDENTIFIED WITH sha256_password BY '${CLICKHOUSE_PASSWORD}';"
+              curl --fail -u ${ADMIN_CLICK_DB_USER}:"${ADMIN_CLICK_DB_PASSWORD}" -X POST \
+                "https://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}/" \
+                --data-binary "CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DATABASE};"
+              curl --fail -u ${ADMIN_CLICK_DB_USER}:"${ADMIN_CLICK_DB_PASSWORD}" -X POST \
+                "https://${MAIN_CLICK_DB_HOST}:${MAIN_CLICK_DB_PORT}/" \
+                --data-binary "GRANT CREATE, DROP, SELECT, INSERT, ALTER, TRUNCATE, OPTIMIZE, SHOW, DELETE ON ${CLICKHOUSE_DATABASE}.* TO ${CLICKHOUSE_USERNAME};"
+          envFrom:
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-env-sensitive
+            - configMapRef:
+                name: {{ include "chart.fullname" . }}-env-nonsensitive
+            - secretRef:
+                name: {{ include "chart.fullname" . }}-db-click-admin
+      imagePullSecrets:
+      {{- range .Values.imagePullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
+{{- end }}
