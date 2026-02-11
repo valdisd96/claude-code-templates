@@ -1,0 +1,9 @@
+{
+  "name": "linux-troubleshooter",
+  "version": "1.0.0",
+  "description": "Remote Linux server diagnostics and troubleshooting via SSH with multi-server support",
+  "author": "uvauchok",
+  "keywords": ["linux", "ssh", "troubleshooting", "sysadmin", "diagnostics", "devops", "server"],
+  "homepage": "https://github.com/uvauchok/claude-code-templates",
+  "license": "MIT"
+}

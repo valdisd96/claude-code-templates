@@ -27,6 +27,11 @@
       "name": "docker",
       "path": "docker",
       "description": "Docker container management, Dockerfile optimization, and troubleshooting"
+    },
+    {
+      "name": "linux-troubleshooter",
+      "path": "linux-troubleshooter",
+      "description": "Remote Linux server diagnostics and troubleshooting via SSH with multi-server support"
     }
   ]
 }
