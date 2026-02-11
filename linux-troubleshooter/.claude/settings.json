@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(grep*)",
+      "Bash(diff*)",
+      "Bash(jq*)",
+      "Bash(yq*)",
+      "Bash(wc*)",
+      "Bash(sort*)",
+      "Bash(head*)",
+      "Bash(tail*)"
+    ],
+    "deny": [
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(sftp *)",
+      "Bash(rsync *)",
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(shutdown*)",
+      "Bash(reboot*)",
+      "Bash(halt*)",
+      "Bash(poweroff*)",
+      "Bash(mkfs*)",
+      "Bash(dd *)"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "server-web1": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--host=web1.example.com",
+        "--user=deploy",
+        "--key=~/.ssh/id_ed25519",
+        "--timeout=30000",
+        "--maxChars=none",
+        "--disableSudo"
+      ]
+    },
+    "server-db1": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--host=db1.example.com",
+        "--user=deploy",
+        "--key=~/.ssh/id_ed25519",
+        "--timeout=30000",
+        "--maxChars=none",
+        "--disableSudo"
+      ]
+    },
+    "server-app1": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "ssh-mcp",
+        "--host=app1.example.com",
+        "--user=deploy",
+        "--key=~/.ssh/id_ed25519",
+        "--timeout=30000",
+        "--maxChars=none",
+        "--disableSudo"
+      ]
+    }
+  }
+}

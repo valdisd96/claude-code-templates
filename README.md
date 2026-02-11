@@ -10,6 +10,7 @@ Pre-built Claude Code configurations for domain-specific workflows.
 | `data-science` | Jupyter notebooks & EDA workflows |
 | `kubernetes` | Cluster management & diagnostics |
 | `helm` | Helm charts development |
+| `linux-troubleshooter` | Remote Linux server diagnostics via SSH |
 
 ## Quick Start
 

@@ -61,6 +61,17 @@ claude-code-templates/
 │       ├── settings.json
 │       └── commands/
 │
+├── linux-troubleshooter/         # Remote Linux Server Diagnostics
+│   ├── CLAUDE.md
+│   ├── README.md
+│   ├── .mcp.json                # ssh-mcp multi-server configuration
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   └── .claude/
+│       ├── settings.json
+│       ├── commands/
+│       └── skills/              # Auto-triggered troubleshooting skills
+│
 └── [future-domains]/            # Additional configurations
 ```
 
@@ -340,6 +351,13 @@ claude
 - Template debugging
 - Dependency management
 - Release management patterns
+
+### Linux Troubleshooter
+- Remote server diagnostics via ssh-mcp MCP server
+- Multi-server support with cross-host comparison
+- Read-only by default (`--disableSudo`), fixes require confirmation
+- Cross-distro compatibility (Debian, RHEL, Alpine, SUSE)
+- Skills auto-trigger on disk, network, service, and performance problems
 
 ### TFX (existing)
 - Pipeline development workflow

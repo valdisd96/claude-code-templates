@@ -1,0 +1,9 @@
+{
+  "enabledMcpjsonServers": [
+    "server-web1",
+    "server-db1",
+    "server-app1",
+    "kb-server"
+  ],
+  "enableAllProjectMcpServers": true
+}
